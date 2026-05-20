@@ -123,33 +123,53 @@ class BookRepositoryIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("should find books by genre")
         void shouldFindByGenre() {
-            // TODO: Save books of different genres
-            //       Query by Genre.SCIENCE and verify only matching books are returned
-            fail("Not implemented yet");
+      createBook("978-1", "Physics Book", "Author A", 3, Genre.SCIENCE);
+      createBook("978-2", "History Book", "Author B", 2, Genre.HISTORY);
+       createBook("978-3", "Biology Book", "Author C", 4, Genre.SCIENCE);
+
+       List<Book> results = bookRepository.findByGenre(Genre.SCIENCE);
+
+       assertThat(results).hasSize(2);
+       assertThat(results).extracting(Book::getGenre)
+            .containsOnly(Genre.SCIENCE);
         }
 
         @Test
         @DisplayName("should find books by author (case insensitive, partial match)")
         void shouldFindByAuthor() {
-            // TODO: Save books by different authors
-            //       Search by partial author name and verify results
-            fail("Not implemented yet");
+         createBook("978-1", "Clean Code", "Robert C. Martin", 3, Genre.TECHNOLOGY);
+         createBook("978-2", "Effective Java", "Joshua Bloch", 2, Genre.TECHNOLOGY);
+         createBook("978-3", "Clean Architecture", "Robert C. Martin", 4, Genre.TECHNOLOGY);
+
+         List<Book> results = bookRepository.findByAuthorContainingIgnoreCase("martin");
+
+         assertThat(results).hasSize(2);
+         assertThat(results).extracting(Book::getAuthor)
+            .containsOnly("Robert C. Martin");
         }
 
         @Test
         @DisplayName("should search by author name using searchBooks()")
         void shouldSearchByAuthorKeyword() {
-            // TODO: Use searchBooks() with an author name as keyword
-            //       Verify it finds books by that author
-            fail("Not implemented yet");
+           createBook("978-1", "Clean Code", "Robert C. Martin", 3, Genre.TECHNOLOGY);
+           createBook("978-2", "Design Patterns", "Gang of Four", 2, Genre.TECHNOLOGY);
+
+           List<Book> results = bookRepository.searchBooks("robert");
+
+          assertThat(results).hasSize(1);
+          assertThat(results.get(0).getTitle()).isEqualTo("Clean Code");
         }
 
         @Test
         @DisplayName("should return empty list when no books match search")
         void shouldReturnEmpty_WhenNoMatch() {
-            // TODO: Search for a keyword that matches nothing
-            fail("Not implemented yet");
-        }
+         
+        createBook("978-1", "Clean Code", "Robert C. Martin", 3, Genre.TECHNOLOGY);
+
+        List<Book> results = bookRepository.searchBooks("nonexistent");
+
+        assertThat(results).isEmpty();
+        
     }
 
     @Nested
