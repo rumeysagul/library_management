@@ -17,6 +17,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.springframework.dao.DataIntegrityViolationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * INTEGRATION TEST - Repository Layer
@@ -179,17 +181,27 @@ class BookRepositoryIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("should enforce unique ISBN constraint")
         void shouldEnforceUniqueIsbn() {
-            // TODO: Try to save two books with the same ISBN
-            //       Verify a DataIntegrityViolationException is thrown
-            //       Hint: Use assertThrows() and flush the persistence context
-            fail("Not implemented yet");
+           createBook("978-1", "First Book", "Author A", 3, Genre.FICTION);
+
+        Book duplicateBook = new Book("978-1", "Second Book", "Author B", 2, Genre.HISTORY);
+
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            bookRepository.saveAndFlush(duplicateBook);
+        });
         }
 
         @Test
         @DisplayName("should handle deleting a book")
         void shouldDeleteBook() {
-            // TODO: Save a book, delete it, verify it's gone
-            fail("Not implemented yet");
+             Book savedBook = createBook("978-2", "Book To Delete", "Author A", 3, Genre.FICTION);
+
+        bookRepository.delete(savedBook);
+        bookRepository.flush();
+
+        Optional<Book> foundBook = bookRepository.findById(savedBook.getId());
+
+        assertThat(foundBook).isEmpty();
+          
         }
     }
 }
