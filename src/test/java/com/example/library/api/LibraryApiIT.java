@@ -236,9 +236,14 @@ class LibraryApiIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("should create a member and return 201")
         void shouldCreateMember() {
-            // TODO: POST a new member to /api/members
-            //       Verify 201 status and response body
-            fail("Not implemented yet");
+            // Post a new member to API
+            Member member = new Member("sinem", "sinem@ieu.com", MembershipType.STANDARD);
+
+            ResponseEntity<Member> response = restTemplate.postForEntity(baseUrl + "/members", member, Member.class);
+
+            // Verify 201 status and response
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+            assertThat(response.getBody().getName()).isEqualTo("sinem");
         }
 
         @Test
@@ -246,9 +251,16 @@ class LibraryApiIT extends AbstractIntegrationTest {
         void shouldDeactivateMember() {
             // TODO:
             // 1. Create a member
+            Member member = createTestMember("sinem", "sinem@ieu.com", MembershipType.STANDARD);
+
             // 2. DELETE /api/members/{id}
-            // 3. GET /api/members/{id} and verify active = false
-            fail("Not implemented yet");
+            restTemplate.delete(baseUrl + "/members/" + member.getId()
+            );
+
+            // 3. GET /api/members/{id}
+            ResponseEntity<Member> response = restTemplate.getForEntity(baseUrl + "/members/" + member.getId(), Member.class);
+
+            assertThat(response.getBody().isActive()).isFalse();
         }
 
         @Test
@@ -268,7 +280,18 @@ class LibraryApiIT extends AbstractIntegrationTest {
         @DisplayName("should search books by keyword via GET /api/books/search?keyword=...")
         void shouldSearchBooks() {
             // TODO: Create several books, search by keyword, verify results
-            fail("Not implemented yet");
+            // Create several books
+            createTestBook("10001", "1984", "George Orwell");
+            createTestBook("10002", "To Kill a Mockingbird", "Harper Lee");
+            createTestBook("10003", "The Great Gatsby", "F. Scott Fitzgerald");
+
+            // Search by keyword
+            ResponseEntity<Book[]> response = restTemplate.getForEntity(baseUrl + "/books/search?keyword=1984", Book[].class);
+
+            // Verify results
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).hasSize(1);
+            assertThat(response.getBody()[0].getTitle()).isEqualTo("1984");
         }
 
         @Test
@@ -276,10 +299,26 @@ class LibraryApiIT extends AbstractIntegrationTest {
         void shouldGetActiveBorrows() {
             // TODO:
             // 1. Create a member and 2 books
+            Member member = createTestMember("sinem", "sinem@ieu.com", MembershipType.STANDARD);
+
+            Book book1 = createTestBook("10001", "1984", "George Orwell");
+            Book book2 = createTestBook("10002", "To Kill a Mockingbird", "F. Scott Fitzgerald");
+
             // 2. Borrow both books
+            BorrowRequest request1 = new BorrowRequest(book1.getId(), member.getId());
+            BorrowRequest request2 = new BorrowRequest(book2.getId(), member.getId());
+
+            ResponseEntity<Map> borrowResponse1 = restTemplate.postForEntity(baseUrl + "/borrows", request1, Map.class);
+            restTemplate.postForEntity(baseUrl + "/borrows", request2, Map.class);
+
             // 3. Return one of them
+            Number borrowId = (Number) borrowResponse1.getBody().get("id");
+            restTemplate.postForEntity(baseUrl + "/borrows/" + borrowId.longValue() + "/return", null, Map.class);
+
             // 4. GET /api/borrows/member/{id}/active — should return only 1
-            fail("Not implemented yet");
+            ResponseEntity<Map[]> response = restTemplate.getForEntity(baseUrl + "/borrows/member/" + member.getId() + "/active", Map[].class);
+
+            assertThat(response.getBody()).hasSize(1);
         }
     }
 }
