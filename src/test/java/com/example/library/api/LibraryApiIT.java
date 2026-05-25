@@ -197,38 +197,37 @@ class LibraryApiIT extends AbstractIntegrationTest {
         void shouldReturn409_WhenBorrowLimitExceeded() {
 
             // 1. Create a STUDENT member (limit = 2 books)
-            Member member = createTestMember(
-                    "Fatih",
-                    "fatih@ieu.com",
-                    MembershipType.STUDENT
-            );
+
+            Member member = createTestMember("Fatih", "fatih@ieu.com", MembershipType.STUDENT);
 
             // 2. Create 3 different books
+
             Book book1 = createTestBook("978-limit-1", "Dune", "Frank Herbert");
+
             Book book2 = createTestBook("978-limit-2", "Tokyo Ghoul", "Ishida Sui");
+
             Book book3 = createTestBook("978-limit-3", "No Longer Human", "Osamu Dazai");
 
             // 3. Borrow 2 books successfully
-            restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(book1.getId(), member.getId()),
-                    Map.class
-            );
 
-            restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(book2.getId(), member.getId()),
-                    Map.class
-            );
+            restTemplate.postForEntity(baseUrl + "/borrows", new BorrowRequest(book1.getId(), member.getId()), Map.class);
+
+            restTemplate.postForEntity(baseUrl + "/borrows", new BorrowRequest(book2.getId(), member.getId()), Map.class);
 
             // 4. Try to borrow a 3rd book — should return 409 CONFLICT
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(book3.getId(), member.getId()),
-                    Map.class
-            );
 
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+
+                    baseUrl + "/borrows",
+
+                    new BorrowRequest(book3.getId(), member.getId()),
+
+                    Map.class
+
+            );
+            // Verify 409 CONFLICT
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+
             assertThat(response.getBody()).isNotNull();
         }
 
@@ -237,44 +236,35 @@ class LibraryApiIT extends AbstractIntegrationTest {
         void shouldReturn409_WhenNoCopiesAvailable() {
 
             // 1. Create a book with totalCopies = 1
-            Book book = new Book(
-                    "978-nocopy-1",
-                    "The Book of Soyga",
-                    "Unknown",
-                    1,
-                    Genre.HISTORY
-            );
+
+            Book book = new Book("978-nocopy-1", "The Book of Soyga", "Unknown", 1, Genre.HISTORY);
 
             book = bookRepository.save(book);
 
             // 2. Create 2 members
-            Member member1 = createTestMember(
-                    "fati",
-                    "fati@ieu.com",
-                    MembershipType.STANDARD
-            );
 
-            Member member2 = createTestMember(
-                    "eren",
-                    "eren@eieu.com",
-                    MembershipType.STANDARD
-            );
+            Member member1 = createTestMember("fati", "fati@ieu.com", MembershipType.STANDARD);
+
+            Member member2 = createTestMember("eren", "eren@eieu.com", MembershipType.STANDARD);
 
             // 3. First member borrows the book successfully
-            restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(book.getId(), member1.getId()),
-                    Map.class
-            );
+
+            restTemplate.postForEntity(baseUrl + "/borrows", new BorrowRequest(book.getId(), member1.getId()), Map.class);
 
             // 4. Second member tries to borrow — should return 409
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(book.getId(), member2.getId()),
-                    Map.class
-            );
 
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+
+                    baseUrl + "/borrows",
+
+                    new BorrowRequest(book.getId(), member2.getId()),
+
+                    Map.class
+
+            );
+            // Verify 409 CONFLICT
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+
             assertThat(response.getBody()).isNotNull();
         }
 
@@ -283,20 +273,23 @@ class LibraryApiIT extends AbstractIntegrationTest {
         void shouldReturn404_WhenMemberNotFound() {
 
             // Create a valid book
-            Book book = createTestBook(
-                    "978-member404",
-                    "Mother",
-                    "Maxim Gorky"
-            );
+
+            Book book = createTestBook("978-member404", "Mother", "Maxim Gorky");
 
             // Try to borrow with a non-existent memberId
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(book.getId(), 999999L),
-                    Map.class
-            );
 
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+
+                    baseUrl + "/borrows",
+
+                    new BorrowRequest(book.getId(), 999999L),
+
+                    Map.class
+
+            );
+            // Verify 404 NOT FOUND
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
             assertThat(response.getBody()).isNotNull();
         }
 
@@ -305,20 +298,23 @@ class LibraryApiIT extends AbstractIntegrationTest {
         void shouldReturn404_WhenBookNotFound() {
 
             // Create a valid member
-            Member member = createTestMember(
-                    "fati",
-                    "fati@ieu.com",
-                    MembershipType.STANDARD
-            );
+
+            Member member = createTestMember("fati", "fati@ieu.com", MembershipType.STANDARD);
 
             // Try to borrow a non-existent bookId
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    baseUrl + "/borrows",
-                    new BorrowRequest(999999L, member.getId()),
-                    Map.class
-            );
 
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+
+                    baseUrl + "/borrows",
+
+                    new BorrowRequest(999999L, member.getId()),
+
+                    Map.class
+
+            );
+            // Verify 404 NOT FOUND
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
             assertThat(response.getBody()).isNotNull();
         }
     }
@@ -361,21 +357,25 @@ class LibraryApiIT extends AbstractIntegrationTest {
         @DisplayName("should return 400 when creating member with invalid email")
         void shouldReturn400_WhenInvalidEmail() {
             // Create a member with an invalid email
-            Member invalidMember = new Member(
-                    "1024512",
-                    "gunlu4gmail.co",
-                    MembershipType.STANDARD
-            );
+
+            Member invalidMember = new Member("1024512", "gunlu4gmail.co", MembershipType.STANDARD);
 
             // Try to create member via POST /api/members
+
             ResponseEntity<Map> response = restTemplate.postForEntity(
+
                     baseUrl + "/members",
+
                     invalidMember,
+
                     Map.class
+
             );
 
             // Verify 400 BAD REQUEST
+
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
             assertThat(response.getBody()).isNotNull();
         }
     }
