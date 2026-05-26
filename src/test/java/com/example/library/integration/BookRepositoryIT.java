@@ -175,11 +175,11 @@ class BookRepositoryIT extends AbstractIntegrationTest {
         }
 
         @Nested
-        @DisplayName("Edge cases")
+        @DisplayName("Edge Cases")
         class EdgeCaseTests {
 
             @Test
-            @DisplayName("should enforce unique ISBN constraint")
+            @DisplayName("should throw exception when ISBN is duplicate")
             void shouldEnforceUniqueIsbn() {
                 createBook("978-1", "First Book", "Author A", 3, Genre.FICTION);
 
@@ -191,7 +191,7 @@ class BookRepositoryIT extends AbstractIntegrationTest {
             }
 
             @Test
-            @DisplayName("should handle deleting a book")
+            @DisplayName("should handle remove a book")
             void shouldDeleteBook() {
                 Book savedBook = createBook("978-2", "Book To Delete", "Author A", 3, Genre.FICTION);
 
