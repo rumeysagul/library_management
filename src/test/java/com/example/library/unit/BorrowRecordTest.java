@@ -83,64 +83,45 @@ class BorrowRecordTest {
         @Test
         @DisplayName("should return true when checked after due date and still borrowed")
         void shouldBeOverdue_WhenPastDueDateAndStillBorrowed() {
-            // Arrange
             BorrowRecord record = new BorrowRecord(createSampleBook(), createSampleMember());
             record.setStatus(BorrowStatus.BORROWED);
-            
-            // Set due date to 2 days ago (past date)
-            record.setDueDate(LocalDate.now().minusDays(2)); 
+            record.setDueDate(LocalDate.now().minusDays(2));
 
-            // Act & Assert
-            // The book is late. It must be overdue.
-            assertTrue(record.isOverdue());
+            assertTrue(record.isOverdue(LocalDate.now()));
         }
 
         @Test
         @DisplayName("should return false when checked before due date")
         void shouldNotBeOverdue_WhenBeforeDueDate() {
-            // Arrange
             BorrowRecord record = new BorrowRecord(createSampleBook(), createSampleMember());
             record.setStatus(BorrowStatus.BORROWED);
-            
-            // Set due date to 5 days in the future
-            record.setDueDate(LocalDate.now().plusDays(5)); 
+            record.setDueDate(LocalDate.now().plusDays(5));
 
-            // Act & Assert
-            // There is still time. It is not overdue.
-            assertFalse(record.isOverdue());
+            assertFalse(record.isOverdue(LocalDate.now()));
         }
 
         @Test
         @DisplayName("should return false when book is already returned (even if past due)")
         void shouldNotBeOverdue_WhenAlreadyReturned() {
-            // Arrange
             BorrowRecord record = new BorrowRecord(createSampleBook(), createSampleMember());
-            
-            // The book is late, but the status is RETURNED
-            record.setDueDate(LocalDate.now().minusDays(5)); 
-            record.setStatus(BorrowStatus.RETURNED); 
+            record.setDueDate(LocalDate.now().minusDays(5));
+            record.setStatus(BorrowStatus.RETURNED);
 
-            // Act & Assert
-            // Returned books are never overdue.
-            assertFalse(record.isOverdue());
+            assertFalse(record.isOverdue(LocalDate.now()));
         }
 
         @Test
         @DisplayName("should return false on exactly the due date")
         void shouldNotBeOverdue_OnExactDueDate() {
-            // Arrange
             BorrowRecord record = new BorrowRecord(createSampleBook(), createSampleMember());
             record.setStatus(BorrowStatus.BORROWED);
-            
-            // The check date (asOfDate) is the same as the due date
             LocalDate asOfDate = LocalDate.now();
-            record.setDueDate(asOfDate); 
+            record.setDueDate(asOfDate);
 
-            // Act & Assert
-            // You can return it today. It is not overdue yet.
-            assertFalse(record.isOverdue());
+            assertFalse(record.isOverdue(asOfDate));
         }
     }
+
 
     @Nested
     @DisplayName("Constructor / default values")
