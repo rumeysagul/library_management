@@ -203,6 +203,20 @@ class BookRepositoryIT extends AbstractIntegrationTest {
                 assertThat(foundBook).isEmpty();
 
             }
+            @Test
+            @DisplayName("should correctly map Book entity to database columns")
+            void shouldCorrectlyMapBookEntity(){
+                Book book = createBook("978-3","Mapping Test","Test Author",5,Genre.SCIENCE);
+
+                Optional<Book> found = bookRepository.findById(book.getId());
+
+                assertThat(found).isPresent();
+                assertThat(found.get().getIsbn()).isEqualTo("978-3");
+                assertThat(found.get().getTitle()).isEqualTo("Mapping Test");
+                assertThat(found.get().getAuthor()).isEqualTo("Test Author");
+                assertThat(found.get().getAvailableCopies()).isEqualTo(5);
+                assertThat(found.get().getGenre()).isEqualTo(Genre.SCIENCE);
+            }
         }
     }
 }
